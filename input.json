@@ -1,0 +1,26 @@
+"\\ucafe"@
+"\\""@
+"\\"@
+"\b\f\n\r\t"@
+"/ & \/"@
+"abcdefghijklmnopqrstuvwyz"@
+"ABCDEFGHIJKLMNOPQRSTUVWYZ"@
+"0123456789"@
+"digit"@
+"`1~!#$%^&*()_+-={':[]}|;.</>?"@
+"\u0123\u4567\u89AB\uCDEF\uabcd\uef4A"@
+"\naked"@
+"test@
+make"@
+fake@
+"\s"@
+"\x15a"@
+'single quote'@
+"	tab	character	in	string	"@
+"line
+break"@
+"line\
+break"@
+
+
+
