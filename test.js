@@ -6,29 +6,11 @@ const boolParser = input => input.startsWith('true') ?
 [false, input.slice(5)]:null
 
 const numParser = function (input){
-   input = input.trimStart()
    const match = /^([+\-]?([1-9]\d*(\.\d+)?|0\.\d+|0)([eE][+\-]?\d+)?)/g.exec(input)
    return match ?[1*match[1],input.slice(match[1].length)] : null
 }
 
-// console.log(numParser("13abc0"))
-// console.log(numParser("15.abc"))
-// console.log(numParser("1234567890"))
-// console.log(numParser("-9876.543210"))
-// console.log(numParser("0.123456789e-12"))
-// console.log(numParser("1.234567890E+34"))
-// console.log(numParser("23456789012E66"))
-// console.log(numParser("0.3.7.5"))
-// console.log(numParser("0"))
-// console.log(numParser("1"))
-// console.log(numParser("013abc"))
-// console.log(numParser("0e+-1"))
-// console.log(numParser("0e+"))
-// console.log(numParser("0e"))
-// console.log(numParser("00.15"))
-
 const strParser = function (input) {
-   input = input.trimStart()
    if (!input.startsWith('"')) return null
    input = input.slice(1)
    let c = 0
@@ -51,48 +33,57 @@ const strParser = function (input) {
    return [input.slice(0,index),input.slice(index+1)]
 }
 
-require('fs').readFile("input.json",(err, data) => {
-   if(err) throw err
-   datas = data.toString().split("@")
-   for (let item of datas){
-      console.log(strParser(item))
+const valParser = function (input){
+   let result = []
+   input = input.trimStart()
+   let fnarray = [nullParser, boolParser, numParser, strParser, arrParser, objParser]
+   for (let item of fnarray){
+      result = item(input)
+      if (result) return result
    }
-})
+}
 
+const arrParser = function (input){
+   input = input.trimStart()
+   if (!(input.startsWith("["))) return null
+   input = input.slice(1)
+   let arrresult=[],result,rest
+   while (input){
+      result = valParser(input)
+      if (!result) return null
+      arrresult.push(result[0])
+      rest = result[1].trimStart()
+      if (rest.startsWith(']')) break
+      if (!rest.startsWith(',')) return null 
+      rest = rest.slice(1)
+      input = rest
+   }
+   rest = rest.slice(1)
+   return [arrresult,rest]
+}
 
-
-
-
-
-
-
-// const arrParser = function (input){
-//    input = input.trim()
-//    if (!(input.startsWith("["))) return null
-//    input = input.slice(1)
-//    let index = 0
-//    while(index < input.length){
-      
-//    }
-   // elements = input.split(",")
-   // index = 0
-   // for (let item of elements){
-   //    item = item.trim()
-   //    if (index === 0){
-   //       if (!item[0] != "["){
-   //          return null
-   //       }
-   //       item = item.slice(1)
-   //    }
-   //    if (index === input.length-1){
-   //          if (!item[item.length-1] != "]"){
-   //             return null
-   //          }
-   //          item = item.slice(0,item.length-1)
-   //    }
-   // }
-   // return "passed"
-// }
-
-// console.log(arrParser('["Unclosed array", "array" , 1 , true, null]'))
-
+const objParser = function (input){
+   input = input.trimStart()
+   if (!(input.startsWith("{"))) return null
+   input = input.slice(1)
+   let objresult={},valresult,keyresult,keyrest
+   while (input){
+      input = input.trimStart()
+      keyresult = strParser(input)
+      if (!keyresult) return null
+      keyrest = keyresult[1].trimStart()
+      if (!keyrest.startsWith(':')) return null
+      keyrest = keyrest.slice(1)
+      valresult = valParser(keyrest)
+      if (!valresult) return null
+      objresult[keyresult[0]] = valresult[0]
+      input = valresult[1].trimStart()
+      if (input.startsWith('}')) break
+      if (!input.startsWith(',')) return null
+      input = input.slice(1)
+   }
+   input = input.slice(1)
+   return [objresult,input]
+}
+console.log(objParser('{"array" : "make" , "5" : 5.67e10}'))
+console.log(arrParser('["array" , "make" , 5, 5.67e10, true, false, null]'))
