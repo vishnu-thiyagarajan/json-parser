@@ -33,21 +33,24 @@ const strParser = function (input) {
    return [input.slice(0,index),input.slice(index+1)]
 }
 
-const valParser = function (input){
+const valParser = function (input,initial=false){
+   let fnarray = [nullParser, boolParser, numParser, strParser, arrParser, objParser]
    let result = []
    input = input.trimStart()
-   let fnarray = [nullParser, boolParser, numParser, strParser, arrParser, objParser]
-   for (let item of fnarray){
+   for (let item of initial ? [arrParser, objParser] : fnarray){
       result = item(input)
+      if (initial && result) return !result[1] ? result[0] : null
       if (result) return result
    }
+   return null
 }
 
 const arrParser = function (input){
    input = input.trimStart()
    if (!(input.startsWith("["))) return null
-   input = input.slice(1)
-   let arrresult=[],result,rest
+   let arrresult=[],result,rest=""
+   input = input.slice(1).trimStart()
+   if (input.startsWith(']')) return [arrresult, input.slice(1)]
    while (input){
       result = valParser(input)
       if (!result) return null
@@ -65,10 +68,10 @@ const arrParser = function (input){
 const objParser = function (input){
    input = input.trimStart()
    if (!(input.startsWith("{"))) return null
-   input = input.slice(1)
+   input = input.slice(1).trimStart()
    let objresult={},valresult,keyresult,keyrest
    while (input){
-      input = input.trimStart()
+      if (input.startsWith('}')) break
       keyresult = strParser(input)
       if (!keyresult) return null
       keyrest = keyresult[1].trimStart()
@@ -80,10 +83,17 @@ const objParser = function (input){
       input = valresult[1].trimStart()
       if (input.startsWith('}')) break
       if (!input.startsWith(',')) return null
-      input = input.slice(1)
+      input = input.slice(1).trimStart()
+      if (input.startsWith('}')) return null
    }
-   input = input.slice(1)
-   return [objresult,input]
+   return input ? [objresult,input.slice(1)] : null
 }
-console.log(objParser('{"array" : "make" , "5" : 5.67e10}'))
-console.log(arrParser('["array" , "make" , 5, 5.67e10, true, false, null]'))
+
+tests = ["fail1.json","fail2.json","fail3.json","fail4.json","fail5.json","fail6.json","fail7.json","fail8.json","fail9.json","fail10.json","fail11.json","fail12.json","fail13.json","fail14.json","fail15.json","fail16.json","fail17.json","fail19.json","fail20.json","fail21.json","fail22.json","fail23.json","fail24.json","fail25.json","fail26.json","fail27.json","fail28.json","fail29.json","fail30.json","fail31.json","fail32.json","fail33.json","pass1.json","pass3.json"]
+// tests = ["fail9.json"]
+for (let test of tests){
+   require('fs').readFile("test/"+test,(err, data) => {
+      if(err) throw err
+      console.log(valParser(data.toString().trim(),true))
+   })
+}
