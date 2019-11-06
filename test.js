@@ -23,7 +23,8 @@ const strParser = function (input,count = 0,index = 0) {
          if (input[index+1] === "u"){
             if (!(/[0-9|A-F]{4}.*?/i.test(input.slice(index+2,index+6)))) return null
                result += String.fromCharCode(parseInt(input.slice(index+2,index+6),16))
-               index += 4
+               index += 5
+               continue
          }
       }
       if (input[index] !== "\\") count = 0
