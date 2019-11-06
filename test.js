@@ -13,6 +13,7 @@ const numParser = function (input){
 const strParser = function (input,count = 0,index = 0) {
    if (!input.startsWith('"')) return null
    input = input.slice(1)
+   let result = ""
    for (;index < input.length;index += 1) {
       if (["\t","\n"].includes(input[index])) return null
       if (input[index] === '"' && count%2 === 0) break
@@ -21,17 +22,19 @@ const strParser = function (input,count = 0,index = 0) {
          if (!['b','f','n','r','t','u','\\','"',"/"].includes(input[index+1])) return null
          if (input[index+1] === "u"){
             if (!(/[0-9|A-F]{4}.*?/i.test(input.slice(index+2,index+6)))) return null
+               result += String.fromCharCode(parseInt(input.slice(index+2,index+6),16))
                index += 4
          }
       }
       if (input[index] !== "\\") count = 0
+      result += input.slice(index,index +1 )
       }
    if (input[index] !== "\"") return null
-   return [input.slice(0,index),input.slice(index+1)]
+   return [result.replace(/\\([^u])/g,"\$1"),input.slice(index+1)]
 }
 
-const valParser = function (input,initial=false,result = []){
-   let fnarray = [nullParser, boolParser, numParser, strParser, arrParser, objParser]
+const valParser = function (input,initial=false){
+   let fnarray = [nullParser, boolParser, numParser, strParser, arrParser, objParser],result = []
    for (let item of initial ? [arrParser, objParser] : fnarray){
       result = item(input.trimStart())
       if (initial && result) return !result[1] ? result[0] : null
