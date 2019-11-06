@@ -17,6 +17,8 @@ const strParser = function (input,count = 0,index = 0) {
    for (;index < input.length;index += 1) {
       if (["\t","\n"].includes(input[index])) return null
       if (input[index] === '"' && count%2 === 0) break
+      if (input[index] !== "\\") count = 0
+      result += input.slice(index,index +1 )
       if (input[index] === "\\"){
          count += 1
          if (!['b','f','n','r','t','u','\\','"',"/"].includes(input[index+1])) return null
@@ -24,12 +26,9 @@ const strParser = function (input,count = 0,index = 0) {
             if (!(/[0-9|A-F]{4}.*?/i.test(input.slice(index+2,index+6)))) return null
                result += String.fromCharCode(parseInt(input.slice(index+2,index+6),16))
                index += 5
-               continue
          }
       }
-      if (input[index] !== "\\") count = 0
-      result += input.slice(index,index +1 )
-      }
+   }
    if (input[index] !== "\"") return null
    return [result.replace(/\\([^u])/g,"\$1"),input.slice(index+1)]
 }
