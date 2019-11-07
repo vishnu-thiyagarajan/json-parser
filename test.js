@@ -10,27 +10,27 @@ const numParser = function (input){
    return match ?[1*match[1],input.slice(match[1].length)] : null
 }
 
-const strParser = function (input,count = 0,index = 0) {
+const strParser = function (input) {
    if (!input.startsWith('"')) return null
    input = input.slice(1)
-   let result = ""
-   for (;index < input.length;index += 1) {
-      if (["\t","\n"].includes(input[index])) return null
-      if (input[index] === '"' && count%2 === 0) break
-      if (input[index] !== "\\") count = 0
-      result += input.slice(index,index +1 )
-      if (input[index] === "\\"){
-         count += 1
-         if (!['b','f','n','r','t','u','\\','"',"/"].includes(input[index+1])) return null
-         if (input[index+1] === "u"){
-            if (!(/[0-9|A-F]{4}.*?/i.test(input.slice(index+2,index+6)))) return null
-               result += String.fromCharCode(parseInt(input.slice(index+2,index+6),16))
-               index += 5
+   let result = "",ref_obj = {'b':'\b','f':'\f','n':'\n','r':'\r','t':'\t','u':'u','\\':'\\','\/':'\/','\"':'\"'}
+   while(!input.startsWith("\"")){
+      if (["\t","\n"].includes(input[0])) return null
+      result += input.slice(0,1)
+      input = input.slice(1)
+      if (result.endsWith("\\")) {
+         result += input.slice(0,1)
+         input = input.slice(1)
+         if (!ref_obj.hasOwnProperty(result.slice(-1))) return null
+         if (!result.endsWith("u")) result = result.slice(0,-2) + ref_obj[result.slice(-1)]
+         if (result.endsWith("u")){
+            if (!(/[0-9|A-F]{4}.*?/i.test(input.slice(0,4)))) return null
+            result = result.slice(0,-2) + String.fromCharCode(parseInt(input.slice(0,4),16))
+            input = input.slice(4)
          }
       }
    }
-   if (input[index] !== "\"") return null
-   return [result.replace(/\\([^u])/g,"\$1"),input.slice(index+1)]
+   return [result,input.slice(1)]
 }
 
 const valParser = function (input,initial=false){
@@ -79,7 +79,6 @@ const objParser = function (input){
 }
 
 tests = ["fail1.json","fail2.json","fail3.json","fail4.json","fail5.json","fail6.json","fail7.json","fail8.json","fail9.json","fail10.json","fail11.json","fail12.json","fail13.json","fail14.json","fail15.json","fail16.json","fail17.json","fail19.json","fail20.json","fail21.json","fail22.json","fail23.json","fail24.json","fail25.json","fail26.json","fail27.json","fail28.json","fail29.json","fail30.json","fail31.json","fail32.json","fail33.json","pass1.json","pass3.json"]
-// tests = ["input.json"]
 for (let test of tests){
    require('fs').readFile("test/"+test,'utf-8',(err, data) => {
       if(err) throw err
