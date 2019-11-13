@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html id="contentContainer">
+<head>
+<title>Move to Click Position</title>
+<style type="text/css">
+#contentContainer {
+    background-color: #F2F2F2;
+}
+#thing {
+    position: relative;
+    transition: left .5s ease-in, top .5s ease-in;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    height: 150px;
+    width: 150px;
+    border-radius: 100%;
+    background: #FFFFFF;
+    box-shadow: 0 0 20px 0 rgba(0,0,0,0.25);
+}
+</style>
+</head>
+<body>
+    <button id="thing"></button>
+<script>
+var theThing = document.querySelector("#thing");
+var container = document.querySelector("#contentContainer");
+container.addEventListener("click", getClickPosition, false);
+ 
+function getClickPosition(e) {
+    var xPosition = e.clientX - (theThing.clientWidth / 2);
+    var yPosition = e.clientY - (theThing.clientHeight / 2);
+    let prevLeft = theThing.style.left ? theThing.style.left.slice(0,-2) : 0
+    let prevTop = theThing.style.top ? theThing.style.top.slice(0,-2) : 0
+    theThing.style.left = xPosition + "px";
+    theThing.style.top = yPosition + "px";
+}
+</script>
+</body>
+</html>
