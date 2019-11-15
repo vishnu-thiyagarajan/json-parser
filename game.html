@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style type="text/css">
+	#thing {
+		position: absolute;
+		transition: left .5s ease-in, top .5s ease-in;
+		display: flex;
+		flex-direction: row;
+		justify-content: center;
+		align-items: center;
+		height: 30px;
+		width: 30px;
+		border-radius: 100%;
+		background: #FFFFFF;
+		box-shadow: 0 0 20px 0 rgba(0,0,0,0.25);
+	}
+</style>
+<script type="text/javascript">
+let ctx = null;
+let gameMap = [
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 1, 1, 1, 0, 1, 1, 1, 1, 0,
+	0, 1, 0, 0, 0, 1, 0, 0, 0, 0,
+	0, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+	0, 1, 0, 1, 0, 0, 0, 1, 1, 0,
+	0, 1, 0, 1, 0, 1, 0, 0, 1, 0,
+	0, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+	0, 1, 0, 0, 0, 0, 0, 1, 0, 0,
+	0, 1, 1, 1, 0, 1, 1, 1, 1, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+];
+let tileW = 40, tileH = 40;
+let mapW = 10, mapH = 10;
+let currentSecond = 0, frameCount = 0, framesLastSecond = 0;
+
+window.onload = function(){
+	elem = document.getElementById('game')
+	ctx = elem.getContext("2d")
+	elem.addEventListener('click', function(e) {
+		let theThing = document.querySelector("#thing");
+		let xPosition = e.clientX - (theThing.clientWidth / 2);
+		let yPosition = e.clientY - (theThing.clientHeight / 2);
+		let prevLeft = theThing.style.left ? theThing.style.left.slice(0,-2) : 0
+		let prevTop = theThing.style.top ? theThing.style.top.slice(0,-2) : 0
+		let from = [parseInt(prevLeft/tileW)+1,parseInt(prevTop/tileW)+1]
+		let to = [parseInt(xPosition/tileW)+1,parseInt(yPosition/tileH)+1]
+		if (from[1] == to[1]) {range(Math.min(from[0],to[0]),Math.max(from[0],to[0]))}
+		if (from[0] == to[0]) {range(Math.min(from[1],to[1]),Math.max(from[1],to[1]))}
+		if (!(from[1] != to[1] && from[0] != to[0])) {
+			theThing.style.left = xPosition + "px";
+			theThing.style.top = yPosition + "px";
+			if (gameMap[(((to[1]-1)*mapW)+(to[0]-1))] == 1) {prompt("GAMEOVER"); location.reload(true)}
+			gameMap[(((to[1]-1)*mapW)+(to[0]-1))] = 2
+	}
+	}, false);
+	requestAnimationFrame(drawGame);
+};
+
+function drawGame(){
+	for(let y = 0; y < mapH; ++y)
+	{for(let x = 0; x < mapW; ++x)
+		{switch(gameMap[((y*mapW)+x)])
+			{case 0:
+				ctx.fillStyle = "#685b48";
+				break;
+			case 1:
+				ctx.fillStyle = "#5aa457";
+				break;
+			default:
+				ctx.fillStyle = "#f8f8ff";
+			}
+			ctx.fillRect( x*tileW, y*tileH, tileW, tileH);
+		}
+	}
+	requestAnimationFrame(drawGame);
+}
+function range(a, b, step=1){
+    let A= [];
+    A[0]= a;
+    while(a+step<= b){
+        A[A.length]= a+= step;
+        }
+    return A;
+}
+</script>
+
+</head>
+<body>
+	<div>
+		<canvas style="position: absolute;" id="game" width="400" height="400"></canvas>
+		<button id="thing"></button>
+	</div>
+</body>
+</html>
