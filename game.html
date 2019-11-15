@@ -2,6 +2,15 @@
 <html>
 <head>
 <style type="text/css">
+#text{
+	top: 450px;
+  	left: 0px;
+  	position: absolute;
+}
+#game{
+	border:1px solid black;
+	position: absolute;
+}
 #thing {
 	position: absolute;
 	transition: left .5s ease-in, top .5s ease-in;
@@ -30,60 +39,44 @@ let gameMap = [
 	0, 1, 1, 1, 0, 1, 1, 1, 1, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 ];
-// gameMap = [
-// 	0,2,2,2,2,2,2,2,2,2,
-// 	0,2,2,2,2,2,2,2,2,2,
-// 	0,2,2,2,2,2,2,2,2,2,
-// 	0,2,2,2,2,2,2,2,2,2,
-// 	0,2,2,2,2,2,2,2,2,2,
-// 	0,2,2,2,2,2,2,2,2,2,
-// 	0,2,2,2,2,2,2,2,2,2,
-// 	0,2,2,2,2,2,2,2,2,2,
-// 	0,2,2,2,2,2,2,2,2,2,
-// 	0,2,2,2,2,2,2,2,2,2,
-// ];
-let tileW = 40, tileH = 40;
-let mapW = 10, mapH = 10;
-let currentSecond = 0, frameCount = 0, framesLastSecond = 0;
-
+let tileW = 40, tileH = 40, mapW = 10, mapH = 10, noOfMoves = 0 
 window.onload = function(){
 	elem = document.getElementById('game')
 	ctx = elem.getContext("2d")
-	document.querySelector("#thing").innerText = Math.floor(Math.random() * 3) + 1
-	elem.addEventListener('click', function(e) {
+	elem.addEventListener('click',moveObject, false);
+	requestAnimationFrame(drawGame);
+};
+
+function moveObject(e) {
 		let theThing = document.querySelector("#thing");
 		let xPosition = e.clientX - (theThing.clientWidth / 2);
 		let yPosition = e.clientY - (theThing.clientHeight / 2);
 		let prevLeft = theThing.style.left ? theThing.style.left.slice(0,-2) : 0
 		let prevTop = theThing.style.top ? theThing.style.top.slice(0,-2) : 0
-		let from = [parseInt(prevLeft/tileW)+1,parseInt(prevTop/tileW)+1]
-		let to = [parseInt(xPosition/tileW)+1,parseInt(yPosition/tileH)+1]
+		let from = [parseInt(prevLeft/tileW),parseInt(prevTop/tileW)]
+		let to = [parseInt(xPosition/tileW),parseInt(yPosition/tileH)]
 		if (!(from[1] != to[1] && from[0] != to[0])) {
+			noOfMoves += 1
 			theThing.style.left = xPosition + "px";
 			theThing.style.top = yPosition + "px";
-			let moved
 			if (from[1] == to[1]) {
 				moved = range(from[0],to[0],1*theThing.innerText);
 				for (let elem of moved){
-					console.log((from[1]-1)*mapW,elem-1)
-					if (gameMap[(((from[1]-1)*mapW)+(elem-1))] == 1) {alert("GAMEOVER"); location.reload(true)}
-					gameMap[(((from[1]-1)*mapW)+(elem-1))] = 2
+					if (gameMap[((from[1]*mapW)+elem)] == 1) {alert("GAMEOVER"); location.reload(true)}
+					gameMap[((from[1]*mapW)+(elem))] = 2
 				}
 			}
 			if (from[0] == to[0]) {
 				moved = range(from[1],to[1],1*theThing.innerText);
 				for (let elem of moved){
-					if (gameMap[(((elem-1)*mapW)+(from[0]-1))] == 1) {alert("GAMEOVER"); location.reload(true)}
-					gameMap[(((elem-1)*mapW)+(from[0]-1))] = 2
+					if (gameMap[((elem*mapW)+from[0])] == 1) {alert("GAMEOVER"); location.reload(true)}
+					gameMap[((elem*mapW)+from[0])] = 2
 				}
-			}			
-			if (gameMap[(((to[1]-1)*mapW)+(to[0]-1))] == 1) {alert("GAMEOVER"); location.reload(true)}
-			console.log(theThing.innerText)
-			theThing.innerText = Math.floor(Math.random() * 3) + 1
+			}
+			console.dir(document.querySelector("#text"))
+			document.querySelector("#text").innerText = "Number of Moves : " + noOfMoves
 	}
-	}, false);
-	requestAnimationFrame(drawGame);
-};
+}
 
 function drawGame(){
 	let flag = 0
@@ -107,6 +100,7 @@ function drawGame(){
 	requestAnimationFrame(drawGame);
 
 }
+
 function range(a, b, step){
 	if (a==b) return []
 	if (a>b) step *= -1
@@ -117,12 +111,25 @@ function range(a, b, step){
         }
     return A;
 }
+
+function incVal(e){
+	let theThing = document.querySelector("#thing");
+	theThing.innerText = parseInt(theThing.innerText) + 1
+}
+
+function decVal(e){
+	e.preventDefault()
+	let theThing = document.querySelector("#thing");
+	if (theThing.innerText=="1") return
+	theThing.innerText = parseInt(theThing.innerText) - 1
+}
 </script>
 </head>
 <body>
 	<div>
-		<canvas style="position: absolute;" id="game" width="400" height="400"></canvas>
-		<button id="thing"></button>
+		<canvas id="game" width="400" height="400"></canvas>
+		<button id="thing" onclick="incVal(event)" oncontextmenu="decVal(event)">1</button>
 	</div>
+	<p id="text">Number of Moves : 0</p>
 </body>
 </html>
